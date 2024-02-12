@@ -5,11 +5,12 @@ const axios = require("axios");
 
 const app = express();
 const port = 3000;
+const NinjasApiKey = "GT3dU4L59cAIphOotHElFQ==ktIeRPtHEytV8NST";
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-app.set("trust proxy", true);
+app.set('trust proxy', true);
 
 app.set("view engine", "ejs");
 
@@ -87,6 +88,17 @@ app.get("/login", async (req, res) => {
     res.render("login", { user: null, error: null });
 });
 
+app.get("/logout", async (req, res) => {
+    const user = await getUserInstance(req.ip);
+
+    if (!user) {
+        return res.render("home", { user, error: "Not logged in" });
+    }
+
+    await UserIpAuth.deleteOne({ ip: req.ip });
+    return res.render("home", { user: null, error: null });
+});
+
 app.get("/registration", async (req, res) => {
     const user = await getUserInstance(req.ip);
 
@@ -99,19 +111,20 @@ app.get("/registration", async (req, res) => {
 
 app.post("/login", async (req, res) => {
     const { username, password } = req.body;
+
     const user = await User.findOne({
         username,
         password,
     });
 
     if (!user || user.password !== password) {
-        return res.render("login", { error: "Invalid username or password" });
+        return res.render("login", { user: null, error: "Invalid username or password" });
     }
 
     const ip = req.ip;
     const userIpAuth = await UserIpAuth.create({ user: user._id, ip });
 
-    res.render("home", { user: user });
+    res.render("home", { user: user, error: null });
 });
 
 app.post("/registration", async (req, res) => {
@@ -121,6 +134,7 @@ app.post("/registration", async (req, res) => {
     const id = await Count.findOne();
     const new_id = id.userID;
     id.userID = id.userID + 1;
+
 
     if (userExists) {
         return res.render("registration", { user: null, error: "User already exists" });
@@ -136,23 +150,25 @@ app.get("/weather/:city", async (req, res) => {
     const user = await getUserInstance(req.ip);
 
     const response = await getWeatherData(city);
+    const city_response = await getCityData(city);
+    const aqi_response = await getAQIData(city);
 
-    res.render("weather", { city, weatherData: response, user: user });
+    res.render("weather", { city: city, weatherData: response ? response : null, user: user, cityData: city_response ? city_response[0] : null, airQualityData: aqi_response ? aqi_response : null, error: null});
 
-    WeatherLog.create({ user: user?._id, city, response: JSON.stringify(response) });
+    Log.create({ user: user?._id, city, response: JSON.stringify(response) });
 });
 
 app.get("/history", async (req, res) => {
     const user = await getUserInstance(req.ip);
 
-    const weatherLogs = await WeatherLog.find({ user: user?._id });
+    const weatherLogs = await Log.find({ user: user?._id });
 
-    res.render("history", { weatherLogs: weatherLogs, user, error: weatherLogs.length === 0 ? "No history found" : null });
+    res.render("history", { weatherLogs: weatherLogs, user, error: weatherLogs.length === 0 ? "No history found" : null});
 });
 
 function getWeatherData(city) {
     const apiKey = "09b0887cfdc2961284caf30e31c34f91";
-    return axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`).then((response) => {
+    return axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`).then((response) => {
         const weatherData = response.data;
 
         const filteredData = {
@@ -166,6 +182,32 @@ function getWeatherData(city) {
         };
 
         return filteredData;
+    }).catch((error) => {
+        return null;
+    });
+}
+
+function getCityData(city) {
+    return axios.get(`https://api.api-ninjas.com/v1/city?name=${city}`, {
+        headers: {
+            'X-Api-Key': NinjasApiKey
+        }
+    }).then((response) => {
+        return response.data;
+    }).catch((error) => {
+        return null;
+    });
+};
+
+function getAQIData(city) {
+    return axios.get(`https://api.api-ninjas.com/v1/airquality?city=${city}`, {
+        headers: {
+            'X-Api-Key': NinjasApiKey
+        }    
+    }).then((response) => {
+        return response.data;
+    }).catch((error) => {
+        return null;
     });
 }
 
@@ -207,7 +249,7 @@ const UserIpAuth = mongoose.model("UserIpAuth", {
     ip: String,
 });
 
-const WeatherLog = mongoose.model("WeatherLog", {
+const Log = mongoose.model("Log", {
     user: mongoose.Schema.Types.ObjectId,
     city: String,
     response: String,
