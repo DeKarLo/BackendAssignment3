@@ -1,0 +1,22 @@
+.form {
+    border: 2px solid #000000;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-image: url("../img/bg.jpg");
+}
+
+.content {
+    padding-top: 100px;
+    min-height: 100vh;
+    flex: 1;
+}
+
+.bg-black {
+    background-color: #fff;
+}

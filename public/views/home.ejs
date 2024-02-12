@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home Page</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/css/style.css" />
+    </head>
+    <body>
+        <%- include('partials/navigation.ejs') %>
+
+        <div class="container vh-100">
+            <h1 class="mt-5">Welcome to lovely Wezerius!</h1>
+            <form action="/weather" method="get" class="mt-4">
+                <div class="mb-3">
+                    <label for="city" class="form-label">Enter City Name:</label>
+                    <input type="text" id="city" name="city" class="form-control" required />
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary">Get Weather</button>
+            </form>
+        </div>
+
+        <%- include('partials/footer.ejs') %>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="/js/weather.js"></script>
+        <script>
+            const token = "<%= token %>";
+            if (token) {
+                localStorage.setItem("token", token);
+            }
+        </script>
+    </body>
+</html>

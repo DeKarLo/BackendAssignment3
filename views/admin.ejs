@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+    <%- include('partials/navigation') %>
+
+    <div class="container mt-4">
+        <h2>Create New User</h2>
+        <form action="/admin/create-user" method="POST" class="mb-5">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create User</button>
+        </form>
+
+        <h2>Users List</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(function(users_user) { %>
+                <tr>
+                    <td><%= users_user.username %></td>
+                    <td>
+                        <form action="/admin/update-user/<%= users_user._id %>" method="POST" class="d-inline">
+                            <input type="text" class="form-control mb-2 mr-sm-2" placeholder="New Username" value="<%= users_user.username %>"  name="username" required>
+                            <input type="password" class="form-control mb-2 mr-sm-2" placeholder="New Password" name="password" value="<%= users_user.password %>" required>
+                            <button type="submit" class="btn btn-secondary mb-2">Update</button>
+                        </form>
+                        <form action="/admin/delete-user/<%= user._id %>" method="GET" class="d-inline">
+                            <button type="submit" class="btn btn-danger mb-2">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <% if (error) { %>
+        <script>
+            alert("<%= error %>");
+        </script>
+    <% } %>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
