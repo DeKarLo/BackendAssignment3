@@ -19,3 +19,7 @@
 -   ejs - Embedded JavaScript templates
 -   body-parser - NodeJS body parsing middleware
 -   mongoose: Node.js library for MongoDB data modeling with schema-based approach.
+
+ADMIN ACCOUNT 
+login: Karen
+pssword: 123
